@@ -1,9 +1,38 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Graph from './Graph';
 
-class App extends React.Component {
+class HideableGraph extends Component {
+  state = {
+    shown: this.props.shown,
+  };
+
+  click = () => {
+    ;
+  };
+
+  render() {
+    return (
+      <table>
+      <tr>
+        <td>
+          <button
+            className="btn btn-default"
+            onClick={() => this.setState({shown: !this.state.shown})}
+            >{ this.state.shown ? "Hide" : "Show" }</button>
+        </td>
+        <td>
+          <div style={{ display: (this.state.shown ? 'block' : 'none') }}>
+              <Graph data={this.props.data}/>
+          </div>
+        </td>
+      </tr>
+      </table>
+    );
+  }
+};
+
+class App extends Component {
   state = {
     data: [
       { name: 1, cost: 4.11, impression: 100 },
@@ -29,13 +58,13 @@ class App extends React.Component {
     ],
     rows: [1, 2, 3, 4, 5],
   };
+
   render() {
-    var rows = [];
-    this.state.rows.forEach( (row) => {
-        rows.push(
-          <tr>
-            <td>{row}</td>
-            <td><Graph data={this.state.data}/></td>
+    var rows = this.state.rows.map((entry, index) => {
+        return (
+          <tr key={index}>
+            <td>{entry}</td>
+            <td><HideableGraph data={this.state.data}  shown={true}/></td>
           </tr>
         );
     });
