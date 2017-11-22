@@ -26,7 +26,7 @@ class HideableGraph extends Component {
           {/*<div style={{ display: (this.state.shown ? 'block' : 'none') }}>
               <Graph data={this.props.data}/>
           </div>}*/}
-          {this.state.shown ? <Graph data={this.props.data}/> : null}
+          {this.state.shown ? <Graph data={this.props.data} /> : null}
         </td>
       </tr></tbody>
       </table>
@@ -71,7 +71,7 @@ class App extends Component {
         let columns = []
 
         columns.push(
-          <td><HideableGraph data={this.state.data}  shown={false}/></td>
+          <td><HideableGraph data={this.state.data}  shown={true}/></td>
         );
 
         for (let key in entry) {

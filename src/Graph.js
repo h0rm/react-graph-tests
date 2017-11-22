@@ -88,8 +88,8 @@ class Graph extends Component {
     return (
       <div className="App-chart" onDoubleClick={this.zoomOut}>
           <LineChart
-            width={800}
-            height={400}
+            width={500}
+            height={100}
             data={data}
             onMouseDown = { this.onMouseDown }
             onMouseMove = { this.onMouseUp }
