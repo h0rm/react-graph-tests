@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Graph from './Graph';
+import mydata from './data/convertcsv.json'
 
 class HideableGraph extends Component {
   state = {
@@ -14,7 +15,7 @@ class HideableGraph extends Component {
   render() {
     return (
       <table>
-      <tr>
+      <tbody><tr>
         <td>
           <button
             className="btn btn-default"
@@ -22,15 +23,17 @@ class HideableGraph extends Component {
             >{ this.state.shown ? "Hide" : "Show" }</button>
         </td>
         <td>
-          <div style={{ display: (this.state.shown ? 'block' : 'none') }}>
+          {/*<div style={{ display: (this.state.shown ? 'block' : 'none') }}>
               <Graph data={this.props.data}/>
-          </div>
+          </div>}*/}
+          {this.state.shown ? <Graph data={this.props.data}/> : null}
         </td>
-      </tr>
+      </tr></tbody>
       </table>
     );
   }
 };
+
 
 class App extends Component {
   state = {
@@ -57,21 +60,40 @@ class App extends Component {
       { name: 20, cost: 7, impression: 100 }
     ],
     rows: [1, 2, 3, 4, 5],
+    csv: mydata,
   };
+  componentDidMount() {
+    console.log(mydata[0])
+  }
 
   render() {
-    var rows = this.state.rows.map((entry, index) => {
+    let rows = this.state.csv.map((entry, index) => {
+        let columns = []
+
+        columns.push(
+          <td><HideableGraph data={this.state.data}  shown={false}/></td>
+        );
+
+        for (let key in entry) {
+          columns.push(
+            <td>{entry[key]}</td>
+          );
+        }
+
         return (
-          <tr key={index}>
-            <td>{entry}</td>
-            <td><HideableGraph data={this.state.data}  shown={true}/></td>
+          <tr>
+          {columns}
           </tr>
         );
     });
 
+    let header = []
+    for (let key in this.state.csv[0]) {
+        header.push(<td>{key}</td>);
+    }
     return (
       <table>
-        <tbody>{rows}</tbody>
+        <tbody>{header}{rows}</tbody>
       </table>
     );
   }
