@@ -71,7 +71,11 @@ class App extends Component {
         let columns = []
 
         columns.push(
-          <td><HideableGraph data={this.state.data}  shown={true}/></td>
+          <td>{index}</td>
+        );
+
+        columns.push(
+          <td><HideableGraph data={this.state.data}  shown={false}/></td>
         );
 
         for (let key in entry) {
