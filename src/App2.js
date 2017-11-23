@@ -10,6 +10,8 @@ import Graph from './Graph';
 import mydata from './data/processed-torch.csv.json'
 import JSONTree from 'react-json-tree'
 import '../node_modules/react-json-inspector/json-inspector.css';
+import '../node_modules/react-dropdown-tree-select/dist/styles.css';
+import DropdownTreeSelect from 'react-dropdown-tree-select'
 
 let Inspector = require('react-json-inspector')
 
@@ -59,36 +61,70 @@ let data = [
       { name: 20, cost: 7, impression: 100 }
     ];
 
-class HideableGraph extends React.Component {
-  state = {
-    shown: this.props.shown,
-  };
+const isObject = (item) => {
+      return (item && typeof item === 'object' && !Array.isArray(item));
+    }
 
-  click = () => {
-    ;
-  };
-
-  render() {
-    return (
-      <table>
-      <tbody><tr>
-        <td>
-          <button
-            className="btn btn-default"
-            onClick={() => this.setState({shown: !this.state.shown})}
-            >{ this.state.shown ? "Hide" : "Show" }</button>
-        </td>
-        <td>
-          {/*<div style={{ display: (this.state.shown ? 'block' : 'none') }}>
-              <Graph data={this.props.data}/>
-          </div>}*/}
-          {this.state.shown ? <Graph data={this.props.data} /> : null}
-        </td>
-      </tr></tbody>
-      </table>  
-    );
+const mergeDeep = (target, source) => {
+  let output = Object.assign({}, target);
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach(key => {
+      if (isObject(source[key])) {
+        if (!(key in target))
+          Object.assign(output, { [key]: source[key] });
+        else
+          output[key] = mergeDeep(target[key], source[key]);
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
   }
+  return output;
+}
+
+const toType = function(obj) {
+  return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+}
+
+
+const getTypes = (val) => {
+  if (isObject(val)) {
+    let ret = {}
+    for (let v in val) {
+      Object.assign(ret, {[v]: getTypes(val[v])});
+    }
+    return ret;
+  }
+  else {
+    return toType(val)
+  }
+}
+
+const getTree = (val, name) => {
+  let children = undefined;
+  if (isObject(val)) {  
+    children = []
+    for (let idx in val ) {
+      children.push(getTree(val[idx], idx));
+    }
+  }
+  return {label: name, value: false, children: children};
 };
+
+const createTree = (input_data) => {
+    let all_data = {};
+    for (let data of input_data) {
+      let elem = data;
+      all_data = mergeDeep(all_data, getTypes(data));
+    }
+
+    let tree = [];
+    for (let idx in all_data) {
+      tree.push(getTree(all_data[idx], idx));
+    }
+
+    return tree;
+}
 
 class Selector extends React.Component {
   onClick = (e) => {
@@ -108,57 +144,64 @@ class Selector extends React.Component {
 
 let csv_data = mydata.map( obj => Object.assign(obj, {trainin_graph: {graph: data }} ));
 
+const tree = createTree(csv_data);
+
 class App extends React.Component {
   state = {
       data: csv_data,
-      value_name: [],
-      n_cols: 5,
-      list: Object.keys(csv_data[0]),
+      tree: createTree(csv_data),
+      columns: [],
+      selected: [],
+      name: "test",
   };
   
-  handleChange = (value, id) => {
-    this.setState({
-      value_name: update(this.state.value_name, {[id]: {$set: value}})
-    });
+  // handleChange = (value, id) => {
+  //   this.setState({
+  //     value_name: update(this.state.value_name, {[id]: {$set: value}})
+  //   });
+  // };
+
+  addSelectd = async (selected) => {
+    this.setState({selected: selected})
+  }
+
+  onChange = (current, selected) => {
+
+    console.log(JSON.stringify(selected));
+    // setTimeout(() => this.setState( prev => ({name: "test2"})), 2000)
+    this.setState({selected: selected})
+
+    // this.addSelectd(selected);
+
+    // this.forceUpdate();
+    return true;
   };
 
   renderCell = (row) => {
-    // return <JSONTree data={row.value} theme={JSONtheme} hideRoot={true}/>;
-    
     if (row.value && typeof row.value === 'object') {
       return <Inspector  data={row.value} search={false}/>
     }
     else {
       return <div>{row.value}</div>;
-      
-    //   // return <HideableGraph data={row.value.graph}  shown={false}/>;
-    //   // return <Graph data={row.value.graph}/>;
-    //   // return <div>graph</div>;
-    // }
-    // else {
-    // return <div>{JSON.stringify(row.value)}</div>;
-    // }
     }
   }
 
-  render = () => {
-    let cols = _.range(this.state.n_cols).map(
-      id => ({
-        Header: <Selector 
-                    handleChange={ value => this.handleChange(value, id) } 
-                    list={this.state.list}  />,
-        id: id.toString(),
-        accessor: d => d[this.state.value_name[id]],
+  selector = (data) => {
+    let name = data.label;
+    return ({
+        Header: name,
+        accessor: name,
         Cell: this.renderCell
-      })
-    );
+      });
+  };
 
-    return (
+  render() {
+    return ( 
       <div className='App'>
         <ReactTable
           showPagination={true}
           data={this.state.data}
-          columns={cols}
+          columns={this.state.selected.map(this.selector)}
           defaultPageSize={20}
           filterable
           className="-striped -highlight -wrap"
@@ -175,6 +218,7 @@ class App extends React.Component {
           }}
         />
         <br />
+        <DropdownTreeSelect data={this.state.tree}  onChange={this.onChange}/>
       </div>
     );
   }
