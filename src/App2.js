@@ -9,6 +9,9 @@ import Graph from './Graph';
 // import mydata from './data/convertcsv.json'
 import mydata from './data/processed-torch.csv.json'
 import JSONTree from 'react-json-tree'
+import '../node_modules/react-json-inspector/json-inspector.css';
+
+let Inspector = require('react-json-inspector')
 
 const JSONtheme = {
   scheme: 'monokai',
@@ -120,17 +123,22 @@ class App extends React.Component {
   };
 
   renderCell = (row) => {
-    return <JSONTree data={row.value} theme={JSONtheme} hideRoot={true}/>;
-    // if (row.value && typeof row.value === 'object') {
-
+    // return <JSONTree data={row.value} theme={JSONtheme} hideRoot={true}/>;
+    
+    if (row.value && typeof row.value === 'object') {
+      return <Inspector  data={row.value} search={false}/>
+    }
+    else {
+      return <div>{row.value}</div>;
       
     //   // return <HideableGraph data={row.value.graph}  shown={false}/>;
     //   // return <Graph data={row.value.graph}/>;
     //   // return <div>graph</div>;
     // }
     // else {
-    //   return <div>{row.value}</div>;
+    // return <div>{JSON.stringify(row.value)}</div>;
     // }
+    }
   }
 
   render = () => {
@@ -146,7 +154,7 @@ class App extends React.Component {
     );
 
     return (
-      <div>
+      <div className='App'>
         <ReactTable
           showPagination={true}
           data={this.state.data}
@@ -158,7 +166,10 @@ class App extends React.Component {
             return (
               <div>
                 <Graph data={row.original.trainin_graph.graph} />
-                <JSONTree data={row.original} theme={JSONtheme} hideRoot={false}/>
+                {
+                  // <JSONTree data={row.original} theme={JSONtheme} hideRoot={false}/>
+                }
+                <Inspector data={row.original}/>
               </div>
             );
           }}
