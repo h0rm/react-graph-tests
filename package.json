@@ -3,9 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eslint-config-react-tools": "^1.0.10",
+    "lodash": "^4.17.4",
+    "namor": "^1.0.1",
     "react": "^16.1.1",
+    "react-addons-update": "^15.6.2",
     "react-dom": "^16.1.1",
     "react-scripts": "1.0.17",
+    "react-table": "^6.7.4",
     "recharts": "^1.0.0-beta.2"
   },
   "scripts": {
@@ -13,5 +18,14 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "main": "index.js",
+  "repository": "https://github.com/h0rm/react-graph-tests.git",
+  "author": "Manuel Keglevic <manuel.keglevic@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.59.0"
   }
 }

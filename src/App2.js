@@ -1,77 +1,131 @@
 import React from "react";
-import { render } from "react-dom";
-import { makeData, Logo, Tips } from "./Utils";
 
 // Import React Table
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import update from 'react-addons-update';
+import './App.css';
+import Graph from './Graph';
+import mydata from './data/convertcsv.json'
 
-class Selector extends React.Component {
+let _ = require('lodash');
+
+let data = [
+      { name: 1, cost: 4.11, impression: 100 },
+      { name: 2, cost: 2.39, impression: 120 },
+      { name: 3, cost: 1.37, impression: 150 },
+      { name: 4, cost: 1.16, impression: 180 },
+      { name: 5, cost: 2.29, impression: 200 },
+      { name: 6, cost: 3, impression: 499 },
+      { name: 7, cost: 0.53, impression: 50 },
+      { name: 8, cost: 2.52, impression: 100 },
+      { name: 9, cost: 1.79, impression: 200 },
+      { name: 10, cost: 2.94, impression: 222},
+      { name: 11, cost: 4.3, impression: 210 },
+      { name: 12, cost: 4.41, impression: 300 },
+      { name: 13, cost: 2.1, impression: 50 },
+      { name: 14, cost: 8, impression: 190 },
+      { name: 15, cost: 0, impression: 300 },
+      { name: 16, cost: 9, impression: 400 },
+      { name: 17, cost: 3, impression: 200 },
+      { name: 18, cost: 2, impression: 50 },
+      { name: 19, cost: 3, impression: 100 },
+      { name: 20, cost: 7, impression: 100 }
+    ];
+
+class HideableGraph extends React.Component {
   state = {
-    value: "firstName",
+    shown: this.props.shown,
+  };
+
+  click = () => {
+    ;
   };
 
   render() {
-    return (<select value={this.state.value_name}
-      onChange={(event) => {this.props.handleChange(event.target.value)}}>
-      <option value="lastName">lastName</option>
-      <option value="firstName">firstName</option>
-      <option value="age">age</option>
-      <option value="status">status</option>
-    </select>
+    return (
+      <table>
+      <tbody><tr>
+        <td>
+          <button
+            className="btn btn-default"
+            onClick={() => this.setState({shown: !this.state.shown})}
+            >{ this.state.shown ? "Hide" : "Show" }</button>
+        </td>
+        <td>
+          {/*<div style={{ display: (this.state.shown ? 'block' : 'none') }}>
+              <Graph data={this.props.data}/>
+          </div>}*/}
+          {this.state.shown ? <Graph data={this.props.data} /> : null}
+        </td>
+      </tr></tbody>
+      </table>
     );
   }
+};
+
+class Selector extends React.Component {
+  onClick = (e) => {
+    e.preventDefault()
+  }
+
+  render = () => (
+    <select 
+      onChange={event => this.props.handleChange(event.target.value)}
+      onClickCapture={this.onClick} 
+    >
+    { this.props.list.map( 
+          (val, idx) => <option value={val} key={idx}>{val}</option> )}
+    </select>
+  )
 }
 
+let csv_data = mydata.map( obj => Object.assign(obj, {trainin_graph: {graph: data }} ));
+
 class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      data: makeData(),
-      value_name: {},
-    };
-  }
+  state = {
+      data: csv_data,
+      value_name: [],
+      n_cols: 5,
+      list: Object.keys(csv_data[0]),
+  };
+  
   handleChange = (value, id) => {
-    this.setState( (prevState) => {
-      prevState.value_name[id] = value;
-      console.log(prevState.value_name[id]);
-      return { prevState };
+    this.setState({
+      value_name: update(this.state.value_name, {[id]: {$set: value}})
     });
+  };
+
+  renderCell = (row) => {
+    if (row.value && typeof row.value === 'object' && "graph" in row.value) {
+      // return <HideableGraph data={row.value.graph}  shown={false}/>;
+      return <Graph data={row.value.graph}/>;
+      // return <div>graph</div>;
+    }
+    else {
+      return <div>{row.value}</div>;
+    }
   }
 
-  render() {
-    const { data } = this.state;
-    console.log(this.state.value_name)
+  render = () => {
+    let cols = _.range(this.state.n_cols).map(
+      id => ({
+        Header: <Selector 
+                    handleChange={ value => this.handleChange(value, id) } 
+                    list={this.state.list}  />,
+        id: id.toString(),
+        accessor: d => d[this.state.value_name[id]],
+        Cell: this.renderCell,
+      })
+    );
+
     return (
       <div>
-
-        <input type="submit" value="Submit" />
         <ReactTable
           showPagination={true}
-          data={data}
-          columns={[
-            {
-              Header: <Selector handleChange={ (value) => this.handleChange(value, 1)}/>,
-              id: "1",
-              accessor: (d) => {return d[this.state.value_name[1]];},
-            },
-            {
-              Header: <Selector handleChange={(value) => this.handleChange(value, 2)} />,
-              id: "2",
-              accessor: (d) => { return d[this.state.value_name[2]]; },
-            },
-            {
-              Header: <Selector handleChange={(value) => this.handleChange(value, 3)} />,
-              id: "3",
-              accessor: (d) => { return d[this.state.value_name[3]]; },
-            },
-            {
-              Header: <Selector handleChange={(value) => this.handleChange(value, 4)} />,
-              id: "4",
-              accessor: (d) => { return d[this.state.value_name[4]]; },
-            },
-          ]}
-          defaultPageSize={100}
+          data={this.state.data}
+          columns={cols}
+          defaultPageSize={20}
           className="-striped -highlight"
         />
         <br />
@@ -80,4 +134,4 @@ class App extends React.Component {
   }
 }
 
-render(<App />, document.getElementById("root"));
+export default App 
