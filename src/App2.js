@@ -10,8 +10,8 @@ import Graph from './Graph';
 import mydata from './data/processed-torch.csv.json'
 import JSONTree from 'react-json-tree'
 import '../node_modules/react-json-inspector/json-inspector.css';
-import '../node_modules/react-dropdown-tree-select/dist/styles.css';
-import DropdownTreeSelect from 'react-dropdown-tree-select'
+// import './react-dropdown-tree-select/src/index.css';
+import DropdownTreeSelect from './react-dropdown-tree-select/src/index'
 
 let Inspector = require('react-json-inspector')
 
@@ -38,29 +38,30 @@ const JSONtheme = {
 
 let _ = require('lodash');
 
-let data = [
-      { name: 1, cost: 4.11, impression: 100 },
-      { name: 2, cost: 2.39, impression: 120 },
-      { name: 3, cost: 1.37, impression: 150 },
-      { name: 4, cost: 1.16, impression: 180 },
-      { name: 5, cost: 2.29, impression: 200 },
-      { name: 6, cost: 3, impression: 499 },
-      { name: 7, cost: 0.53, impression: 50 },
-      { name: 8, cost: 2.52, impression: 100 },
-      { name: 9, cost: 1.79, impression: 200 },
-      { name: 10, cost: 2.94, impression: 222},
-      { name: 11, cost: 4.3, impression: 210 },
-      { name: 12, cost: 4.41, impression: 300 },
-      { name: 13, cost: 2.1, impression: 50 },
-      { name: 14, cost: 8, impression: 190 },
-      { name: 15, cost: 0, impression: 300 },
-      { name: 16, cost: 9, impression: 400 },
-      { name: 17, cost: 3, impression: 200 },
-      { name: 18, cost: 2, impression: 50 },
-      { name: 19, cost: 3, impression: 100 },
-      { name: 20, cost: 7, impression: 100 }
-    ];
+// let data = [
+//       { name: 1, cost: 4.11, impression: 100 },
+//       { name: 2, cost: 2.39, impression: 120 },
+//       { name: 3, cost: 1.37, impression: 150 },
+//       { name: 4, cost: 1.16, impression: 180 },
+//       { name: 5, cost: 2.29, impression: 200 },
+//       { name: 6, cost: 3, impression: 499 },
+//       { name: 7, cost: null, impression: 50 },
+//       { name: 8, cost: 2.52, impression: 100 },
+//       { name: 9, cost: 1.79, impression: 200 },
+//       { name: 10, cost: null, impression: 222},
+//       { name: 11, cost: 4.3, impression: 210 },
+//       { name: 12, cost: 4.41, impression: 300 },
+//       { name: 13, cost: 2.1, impression: 50 },
+//       { name: 14, cost: 8, impression: 190 },
+//       { name: 15, cost: 0, impression: 300 },
+//       { name: 16, cost: 9, impression: 400 },
+//       { name: 17, cost: 3, impression: 200 },
+//       { name: 18, cost: 2, impression: 50 },
+//       { name: 19, cost: 3, impression: 100 },
+//       { name: 20, cost: 7, impression: 100 }
+//     ];
 
+let graph_data = require('./data/02d1f904-4b87-4b43-cbaa-d2aba9b52a06.json')
 const isObject = (item) => {
       return (item && typeof item === 'object' && !Array.isArray(item));
     }
@@ -100,15 +101,16 @@ const getTypes = (val) => {
   }
 }
 
-const getTree = (val, name) => {
+const getTree = (val, name, parent) => {
+  let full_name = parent == undefined ? name : parent + "." + name;
   let children = undefined;
   if (isObject(val)) {  
     children = []
     for (let idx in val ) {
-      children.push(getTree(val[idx], idx));
+      children.push(getTree(val[idx], idx, full_name));
     }
   }
-  return {label: name, value: false, children: children};
+  return {label: name, value: full_name, children: children, checked: false};
 };
 
 const createTree = (input_data) => {
@@ -142,17 +144,39 @@ class Selector extends React.Component {
   )
 }
 
-let csv_data = mydata.map( obj => Object.assign(obj, {trainin_graph: {graph: data }} ));
+// let csv_data = mydata.map( obj => Object.assign(obj, {trainin_graph: {graph: data }} ));
+let csv_data = mydata
 
 const tree = createTree(csv_data);
 
+class GraphLoader extends React.Component {
+
+  state = { 
+    file: this.props.data,
+    graph: null
+  }; 
+
+
+  componentWillMount = () => {
+    let graph = require('./data/' + this.state.file + '.json')
+    for (let i in graph) {
+      for (let j in graph[i])
+        graph[i][j] = graph[i][j] == "" ? null : graph[i][j]
+    }
+    this.setState({graph})
+    console.log('loaded '+ this.state.file)
+  }
+
+  render () {
+    return <Graph data={this.state.graph} />
+  }
+}
 class App extends React.Component {
   state = {
       data: csv_data,
       tree: createTree(csv_data),
-      columns: [],
       selected: [],
-      name: "test",
+      name: 'test',
   };
   
   // handleChange = (value, id) => {
@@ -161,20 +185,47 @@ class App extends React.Component {
   //   });
   // };
 
-  addSelectd = async (selected) => {
-    this.setState({selected: selected})
-  }
 
   onChange = (current, selected) => {
 
-    console.log(JSON.stringify(selected));
+    // let path = current.value.split(".");
+    // let r = this.state.tree;
+    // let check = current.checked;
+    this.setState({selected});
+
+    // const updateTree = (node, stack, idx) => {
+    //   let curr_stack = stack ? stack : [];
+    //   curr_stack.push(node);
+
+    //   for (let idx in node) {
+
+    //   }
+
+    // };
+
+    // const fnc = (path, current) => {
+    //   let p = path[0];
+
+    //   if (path.length > 1) {
+
+    //     return {[p]: fnc(path.slice(1))};
+    //   }
+    //   else {
+    //     return {[p]: {checked: {$set: check}}};
+    //   }
+    // };
+
+    // let up = fnc(path, this.state.tree);
+    
+    // this.setState({
+    //   tree: update(this.state.tree, {network: {checked: {$set: true}}})
+    // });
+
+    // this.setState({name: "test2"});
+
     // setTimeout(() => this.setState( prev => ({name: "test2"})), 2000)
-    this.setState({selected: selected})
-
-    // this.addSelectd(selected);
-
-    // this.forceUpdate();
-    return true;
+    // this.setState({selected: selected})
+    // return (current, selected);
   };
 
   renderCell = (row) => {
@@ -186,11 +237,28 @@ class App extends React.Component {
     }
   }
 
+
+  accessor = (data, path) => {
+    console.log(JSON.stringify(path))
+    let p = path.split(".")
+    let n = data
+
+    for (let idx of p) {
+      if (!(idx in n)) {
+        return
+      }
+      n = n[idx]
+    }
+
+    return n
+  }
+
   selector = (data) => {
     let name = data.label;
     return ({
         Header: name,
-        accessor: name,
+        id: data.value,
+        accessor: (d) => this.accessor(d, data.value),
         Cell: this.renderCell
       });
   };
@@ -198,6 +266,9 @@ class App extends React.Component {
   render() {
     return ( 
       <div className='App'>
+      
+        <DropdownTreeSelect data={tree}  onChange={ this.onChange}/>
+        <br/>
         <ReactTable
           showPagination={true}
           data={this.state.data}
@@ -208,7 +279,7 @@ class App extends React.Component {
           SubComponent= {row => {
             return (
               <div>
-                <Graph data={row.original.trainin_graph.graph} />
+                <GraphLoader data={row.original.guid} />
                 {
                   // <JSONTree data={row.original} theme={JSONtheme} hideRoot={false}/>
                 }
@@ -217,8 +288,9 @@ class App extends React.Component {
             );
           }}
         />
-        <br />
-        <DropdownTreeSelect data={this.state.tree}  onChange={this.onChange}/>
+          {
+        // <Inspector data={this.state.tree}/>
+        }
       </div>
     );
   }
