@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "eslint-config-defaults": "^9.0.0",
     "eslint-config-react-tools": "^1.0.10",
     "lodash": "^4.17.4",
     "namor": "^1.0.1",
@@ -20,7 +21,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint *.js"
   },
   "main": "index.js",
   "repository": "https://github.com/h0rm/react-graph-tests.git",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-flow": "^6.23.0",
+    "eslint-config-google": "^0.9.1",
     "flow-bin": "^0.59.0"
   }
 }

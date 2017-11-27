@@ -74,6 +74,10 @@ class Graph extends Component {
     }) );
   }
 
+  componentWillReceiveProps = (nextProps) => {
+    this.setState({data: nextProps.data})
+  }
+
   onMouseDown = (event) => {
     if (event)
       this.setState({refAreaLeft:event.activeLabel});
