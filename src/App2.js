@@ -6,7 +6,7 @@ import 'react-table/react-table.css';
 import './App.css';
 import Graph from './Graph';
 import '../node_modules/react-json-inspector/json-inspector.css';
-import DropdownTreeSelect from './react-dropdown-tree-select/src/index';
+import DropdownTreeSelect from './react-dropdown-tree-select/src/index.js';
 
 let Inspector = require('react-json-inspector');
 
@@ -110,18 +110,21 @@ class GraphLoader extends React.Component {
        })
       .then(function(response) {
         if (response.status >= 400) {
-          throw new Error("Bad response from server");
+          console.Log("Bad response from server");
+          return 
         }
         return response.json();
       })
       .then( data => {
-        let graph = data;
-        for (let i in graph) {
-          for (let j in graph[i])
-            graph[i][j] = graph[i][j] === "" ? null : graph[i][j]
-        }
+        if (data) {
+          let graph = data;
+          for (let i in graph) {
+            for (let j in graph[i])
+              graph[i][j] = graph[i][j] === "" ? null : graph[i][j]
+          }
 
-        this.setState({ graph: graph });
+          this.setState({ graph: graph });
+        }
       });
     }
 
@@ -151,13 +154,16 @@ class App extends React.Component {
        })
       .then(function(response) {
         if (response.status >= 400) {
-          throw new Error("Bad response from server");
+          console.log("Bad response from server");
+          return
         }
         return response.json();
       })
       .then(function(data) {
-        let j = data;
-        that.setState({ data: j, tree: createTree(j)});
+        if (data) {
+          let j = data;
+          that.setState({ data: j, tree: createTree(j)});
+        }
       });
   }
 

@@ -1,0 +1,3 @@
+[submodule "src/react-dropdown-tree-select"]
+	path = src/react-dropdown-tree-select
+	url = https://github.com/h0rm/react-dropdown-tree-select.git
