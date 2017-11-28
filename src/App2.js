@@ -6,7 +6,8 @@ import 'react-table/react-table.css';
 import './App.css';
 import Graph from './Graph';
 import '../node_modules/react-json-inspector/json-inspector.css';
-import DropdownTreeSelect from './react-dropdown-tree-select/src/index.js';
+import DropdownTreeSelect from 'react-dropdown-tree-select';
+import '../node_modules/react-dropdown-tree-select/dist/styles.css';
 
 let Inspector = require('react-json-inspector');
 
@@ -76,22 +77,6 @@ const createTree = (input_data) => {
     return tree;
 }
 
-class Selector extends React.Component {
-  onClick = (e) => {
-    e.preventDefault()
-  }
-
-  render = () => (
-    <select 
-      onChange={event => this.props.handleChange(event.target.value)}
-      onClickCapture={this.onClick} 
-    >
-    { this.props.list.map( 
-          (val, idx) => <option value={val} key={idx}>{val}</option> )}
-    </select>
-  )
-}
-
 class GraphLoader extends React.Component {
 
   state = { 
@@ -101,7 +86,11 @@ class GraphLoader extends React.Component {
 
 
   componentDidMount = () => {
-      var url = 'data/'+ this.state.file + '.json'
+      let server = ''
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+         server = "http://localhost:5000/"
+      }
+      var url = server + 'data/'+ this.state.file + '.json'
 
       fetch(url, {
         headers : { 
@@ -110,7 +99,7 @@ class GraphLoader extends React.Component {
        })
       .then(function(response) {
         if (response.status >= 400) {
-          console.Log("Bad response from server");
+          console.log("Bad response from server graph file.");
           return 
         }
         return response.json();
@@ -144,25 +133,28 @@ class App extends React.Component {
   };
 
   componentDidMount = () => {
-      var that = this;
-      var url = 'data/processed-torch.csv.json'
+      let server = ''
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+         server = "http://localhost:5000/"
+      }
+      var url = server + 'data/processed-torch.csv.json'
 
       fetch(url, {
         headers : { 
           'Content-Type': 'application/json',
           'Accept': 'application/json' }
        })
-      .then(function(response) {
+      .then( response => {
         if (response.status >= 400) {
           console.log("Bad response from server");
           return
         }
         return response.json();
       })
-      .then(function(data) {
+      .then( data => {
         if (data) {
-          let j = data;
-          that.setState({ data: j, tree: createTree(j)});
+          let tree = createTree(data)
+          this.setState({ data: data, tree: tree});
         }
       });
   }
@@ -210,7 +202,11 @@ class App extends React.Component {
     return ( 
       <div className='App'>
       
-        {this.state.tree.length > 0 ? <DropdownTreeSelect data={this.state.tree}  onChange={ this.onChange}/> : null}
+        { this.state.tree.length > 0 
+          ? <DropdownTreeSelect data={this.state.tree}  onChange={ this.onChange}/> 
+          : 'processed-torch.csv.json not found'
+        }
+     
         <br/>
         <ReactTable
           showPagination={true}

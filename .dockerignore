@@ -10,5 +10,5 @@ README.md
 build
 node_modules
 
-# DATA will be mapped
-src/data/*
+dep/react-dropdown-tree-select/node_modules
+dep/react-dropdown-tree-select/dist

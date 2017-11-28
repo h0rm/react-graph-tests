@@ -7,14 +7,14 @@
     "eslint-config-react-tools": "^1.0.10",
     "lodash": "^4.17.4",
     "namor": "^1.0.1",
-    "react": "^16.1.1",
-    "react-addons-update": "^15.6.2",
-    "react-dom": "^16.1.1",
-    "react-dropdown-tree-select": "file:.\\src\\react-dropdown-tree-select",
     "react-json-inspector": "^7.1.1",
     "react-scripts": "1.0.17",
     "react-table": "^6.7.4",
-    "recharts": "^1.0.0-beta.2"
+    "recharts": "^1.0.0-beta.2",
+    "react": "^16.1.1",
+    "react-addons-update": "^15.6.2",
+    "react-dom": "^16.1.1",
+    "react-dropdown-tree-select": "^1.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
