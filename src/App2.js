@@ -53,7 +53,7 @@ const getTypes = (val) => {
 const getTree = (val, name, parent) => {
   let full_name = parent === undefined ? name : parent + "." + name;
   let children = undefined;
-  if (isObject(val)) {  
+  if (isObject(val)) {
     children = []
     for (let idx in val ) {
       children.push(getTree(val[idx], idx, full_name));
@@ -78,11 +78,11 @@ const createTree = (input_data) => {
 }
 
 class GraphLoader extends React.Component {
-
-  state = { 
+  
+  state = {
     file: this.props.data,
     graph: [],
-  }; 
+  };
 
 
   componentDidMount = () => {
@@ -93,14 +93,14 @@ class GraphLoader extends React.Component {
       var url = server + 'data/'+ this.state.file + '.json'
 
       fetch(url, {
-        headers : { 
+        headers : {
           'Content-Type': 'application/json',
           'Accept': 'application/json' }
        })
       .then(function(response) {
         if (response.status >= 400) {
           console.log("Bad response from server graph file.");
-          return 
+          return
         }
         return response.json();
       })
@@ -140,7 +140,7 @@ class App extends React.Component {
       var url = server + 'data/processed-torch.csv.json'
 
       fetch(url, {
-        headers : { 
+        headers : {
           'Content-Type': 'application/json',
           'Accept': 'application/json' }
        })
@@ -199,14 +199,14 @@ class App extends React.Component {
   };
 
   render() {
-    return ( 
+    return (
       <div className='App'>
-      
-        { this.state.tree.length > 0 
-          ? <DropdownTreeSelect data={this.state.tree}  onChange={ this.onChange}/> 
+
+        { this.state.tree.length > 0
+          ? <DropdownTreeSelect data={this.state.tree}  onChange={ this.onChange}/>
           : 'processed-torch.csv.json not found'
         }
-     
+
         <br/>
         <ReactTable
           showPagination={true}
@@ -229,4 +229,4 @@ class App extends React.Component {
   }
 }
 
-export default App 
+export default App
