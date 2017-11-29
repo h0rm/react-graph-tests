@@ -1,5 +1,5 @@
 # In your Dockerfile.
-FROM node:7.8.0
+FROM node:9.2
 
 # The base node image sets a very verbose log level.
 ENV NPM_CONFIG_LOGLEVEL warn
@@ -25,10 +25,10 @@ COPY ./dep /app/dep
 
 WORKDIR /app/dep/react-dropdown-tree-select
 RUN yarn link react
-RUN yarn install 
+RUN yarn install
 RUN yarn build
 
-RUN yarn link 
+RUN yarn link
 
 # Build app
 WORKDIR /app/
@@ -43,4 +43,4 @@ RUN yarn build
 # Let Docker know about the port that serve runs on.
 EXPOSE 3000
 
-CMD serve -s -C build
+CMD ["serve","-s","-C","build"]
