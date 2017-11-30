@@ -3,7 +3,14 @@
 Parses a json file with an array of arbitrary objects and displays it as a
 customizable table. Additionally supports rendering of graphs.
 
+Table with expanded detailed view  for first row which shows all the
+data in a searchable object tree + toplevel graphs:
+
 ![Screenshot](docs/screenshot.png)
+
+In-row graphs:
+
+![Screenshot](docs/screenshot_inlinegraphs.png)
 
 # Build docker
 
