@@ -14,19 +14,26 @@ const colors = [ '#1f77b4',  // muted blue
     '#bcbd22',  // curry yellow-green
     '#17becf'   // blue-teal
   ];
-// const getAxisYDomain = (data, from, to, ref, offset) => {
-// 	const refData = data.slice(from-1, to);
-//   let [ bottom, top ] = [ refData[0][ref], refData[0][ref] ];
-//   refData.forEach( d => {
-//   	if ( d[ref] > top ) top = d[ref];
-//     if ( d[ref] < bottom ) bottom = d[ref];
-//   });
 
-//   return [ (bottom|0) - offset, (top|0) + offset ]
-// };
+const getAxisXDomain = (data, from, to, ref) => {
+
+  if ( from > to )
+    [ from, to ] = [ to, from ];
+
+  let left = null
+  let right = null
+
+  data.forEach( (d,idx) => {
+    if ( !left && d[ref] > from ) left = idx;
+    if ( d[ref] < to ) right = idx;
+  });
+
+  return [ left-1, right+2 ]
+};
 
 class Graph extends Component {
   state = {
+    original_data: this.props.data,
     data: this.props.data,
     left : 'dataMin',
     right : 'dataMax',
@@ -34,23 +41,25 @@ class Graph extends Component {
     refAreaRight : '',
     xaxis: this.props.xaxis,
     yaxis: this.props.yaxis,
-    // top : 'dataMax+1',
-    // bottom : 'dataMin-1',
-    // top2 : 'dataMax+20',
-    // bottom2 : 'dataMin-20',
+    top : 'dataMax+1',
+    bottom : 'dataMin-1',
+    top2 : 'dataMax+20',
+    bottom2 : 'dataMin-20',
     animation : true
   };
 
   componentWillReceiveProps = (props) => {
     if (!equal(props.data, this.state.data, {strict: true})) {
-      this.setState({data: props.data, xaxis: props.xaxis, yaxis:props.yaxis})
+      this.setState({data: props.data, original_data: props.data,
+                    xaxis: props.xaxis, yaxis:props.yaxis})
     }
   }
 
   zoom = () => {
     let { refAreaLeft, refAreaRight, data } = this.state;
 
-		if ( refAreaLeft === refAreaRight || refAreaRight === '' ) {
+		if ( !refAreaRight || !refAreaLeft ||
+      refAreaLeft === refAreaRight || refAreaRight === '' ) {
       this.setState( () => ({
         refAreaLeft : '',
         refAreaRight : ''
@@ -58,37 +67,27 @@ class Graph extends Component {
       return;
     }
 
-		// xAxis domain
-    if ( refAreaLeft > refAreaRight )
-      [ refAreaLeft, refAreaRight ] = [ refAreaRight, refAreaLeft ];
-
-     // getAxisYDomain(this.props.data, refAreaLeft, refAreaRight, 'Training', 1 );
-		// yAxis domain
-    // const [ bottom, top ] = getAxisYDomain(this.props.data, refAreaLeft, refAreaRight, '1', 1 );
-    // const [ bottom2, top2 ] = getAxisYDomain(this.props.data, refAreaLeft, refAreaRight, '2', 50 );
+    let [left, right ] =
+        getAxisXDomain(data, refAreaLeft, refAreaRight, this.state.xaxis)
 
     this.setState( () => ({
       refAreaLeft : '',
       refAreaRight : '',
-      data : data.slice(),
+      data : data.slice(left, right),//
       left : refAreaLeft,
       right : refAreaRight,
-      // bottom, top, bottom2, top2
     } ) );
   };
 
 	zoomOut = () => {
-    const { data } = this.state;
     this.setState( () => ({
-      data : data.slice(),
+      data : this.state.original_data.slice(),
       refAreaLeft : '',
       refAreaRight : '',
       left : 'dataMin',
       right : 'dataMax',
-      // top : 'dataMax+10',
-      // bottom : 'dataMin',
-      // top2 : 'dataMax+50',
-      // bottom2: 'dataMin+50'
+      top : 'dataMax+10',
+      bottom : 'dataMin',
     }) );
   }
 
@@ -103,14 +102,12 @@ class Graph extends Component {
   };
 
   render() {
-    const { data, left, right, refAreaLeft, refAreaRight, top, bottom, top2, bottom2 } = this.state;
-    // "Epoch", 'Training', 'Validation','Score1','Score2'
     return (
       <div className="App-chart" onDoubleClick={this.zoomOut}>
         <ResponsiveContainer height={200} width="100%">
           <LineChart
             margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-            data={data}
+            data={this.state.data}
             onMouseDown = { this.onMouseDown }
             onMouseMove = { this.onMouseUp }
             onMouseUp = { this.zoom }
@@ -120,12 +117,11 @@ class Graph extends Component {
             <XAxis
               allowDataOverflow={false}
               dataKey={this.state.xaxis}
-              domain={[left, right]}
+              domain={[this.state.left, this.state.right]}
               type="number"
             />
             <YAxis
               allowDataOverflow={false}
-              // domain={[bottom, top]}
               type="number"
               yAxisId="1"
              />
@@ -141,8 +137,10 @@ class Graph extends Component {
             }
             <Legend verticalAlign="top" height={36}/>
             {
-              (refAreaLeft && refAreaRight) ? (
-              <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight}  strokeOpacity={0.3} /> ) : null
+              this.state.refAreaLeft && this.state.refAreaRight &&
+              <ReferenceArea yAxisId="1"
+                x1={this.state.refAreaLeft}
+                x2={this.state.refAreaRight} strokeOpacity={0.3} />
             }
           </LineChart>
         </ResponsiveContainer>
