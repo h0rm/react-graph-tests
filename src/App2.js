@@ -78,9 +78,9 @@ const createTree = (input_data) => {
 }
 
 class GraphLoader extends React.Component {
-  
+
   state = {
-    file: this.props.data,
+    data: this.props.data,
     graph: [],
   };
 
@@ -90,7 +90,7 @@ class GraphLoader extends React.Component {
       if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
          server = "http://localhost:5000/"
       }
-      var url = server + 'data/'+ this.state.file + '.json'
+      var url = server + 'data/'+ this.state.data.json
 
       fetch(url, {
         headers : {
@@ -119,7 +119,9 @@ class GraphLoader extends React.Component {
 
     render () {
       return (
-        <Graph data={this.state.graph} />
+        <Graph data={this.state.graph}
+               xaxis={this.state.data.xaxis}
+               yaxis={this.state.data.yaxis} />
       );
     }
 }
@@ -198,8 +200,15 @@ class App extends React.Component {
       });
   };
 
+  selectGraph = (data) => {
+    if ( data.hasOwnProperty('$graph') ) {
+        return data["$graph"];
+    }
+  }
+
   render() {
     return (
+
       <div className='App'>
 
         { this.state.tree.length > 0
@@ -218,7 +227,15 @@ class App extends React.Component {
           SubComponent= {row => {
             return (
               <div>
-                <GraphLoader data={row.original.guid} />
+                {
+                  Object.keys(row.original).map((key,id) => {
+                    let data = row.original[key]
+                    if ( data.hasOwnProperty('$graph')) {
+                      return <GraphLoader data={data["$graph"]} key={id}/>;
+                    }
+                  })
+                }
+
                 <Inspector data={row.original}/>
               </div>
             );

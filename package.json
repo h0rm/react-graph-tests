@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "deep-equal": "^1.0.1",
     "eslint-config-defaults": "^9.0.0",
     "eslint-config-react-tools": "^1.0.10",
     "lodash": "^4.17.4",

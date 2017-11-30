@@ -2,7 +2,18 @@ import React, { Component } from 'react';
 import { LineChart, Line,
   CartesianGrid, XAxis, YAxis, Tooltip, ReferenceArea, Legend, ResponsiveContainer } from 'recharts';
 
-
+let equal = require('deep-equal');
+const colors = [ '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick red
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+  ];
 // const getAxisYDomain = (data, from, to, ref, offset) => {
 // 	const refData = data.slice(from-1, to);
 //   let [ bottom, top ] = [ refData[0][ref], refData[0][ref] ];
@@ -21,6 +32,8 @@ class Graph extends Component {
     right : 'dataMax',
     refAreaLeft : '',
     refAreaRight : '',
+    xaxis: this.props.xaxis,
+    yaxis: this.props.yaxis,
     // top : 'dataMax+1',
     // bottom : 'dataMin-1',
     // top2 : 'dataMax+20',
@@ -28,21 +41,26 @@ class Graph extends Component {
     animation : true
   };
 
-  onCo
+  componentWillReceiveProps = (props) => {
+    if (!equal(props.data, this.state.data, {strict: true})) {
+      this.setState({data: props.data, xaxis: props.xaxis, yaxis:props.yaxis})
+    }
+  }
+
   zoom = () => {
-  	let { refAreaLeft, refAreaRight, data } = this.state;
+    let { refAreaLeft, refAreaRight, data } = this.state;
 
 		if ( refAreaLeft === refAreaRight || refAreaRight === '' ) {
-    	this.setState( () => ({
-      	refAreaLeft : '',
+      this.setState( () => ({
+        refAreaLeft : '',
         refAreaRight : ''
       }) );
-    	return;
+      return;
     }
 
 		// xAxis domain
-	  if ( refAreaLeft > refAreaRight )
-    		[ refAreaLeft, refAreaRight ] = [ refAreaRight, refAreaLeft ];
+    if ( refAreaLeft > refAreaRight )
+      [ refAreaLeft, refAreaRight ] = [ refAreaRight, refAreaLeft ];
 
      // getAxisYDomain(this.props.data, refAreaLeft, refAreaRight, 'Training', 1 );
 		// yAxis domain
@@ -52,7 +70,7 @@ class Graph extends Component {
     this.setState( () => ({
       refAreaLeft : '',
       refAreaRight : '',
-    	data : data.slice(),
+      data : data.slice(),
       left : refAreaLeft,
       right : refAreaRight,
       // bottom, top, bottom2, top2
@@ -60,8 +78,8 @@ class Graph extends Component {
   };
 
 	zoomOut = () => {
-  	const { data } = this.state;
-  	this.setState( () => ({
+    const { data } = this.state;
+    this.setState( () => ({
       data : data.slice(),
       refAreaLeft : '',
       refAreaRight : '',
@@ -72,10 +90,6 @@ class Graph extends Component {
       // top2 : 'dataMax+50',
       // bottom2: 'dataMin+50'
     }) );
-  }
-
-  componentWillReceiveProps = (nextProps) => {
-    this.setState({data: nextProps.data})
   }
 
   onMouseDown = (event) => {
@@ -105,7 +119,7 @@ class Graph extends Component {
             <CartesianGrid strokeDasharray="3 3"/>
             <XAxis
               allowDataOverflow={false}
-              dataKey="Epoch"
+              dataKey={this.state.xaxis}
               domain={[left, right]}
               type="number"
             />
@@ -115,26 +129,19 @@ class Graph extends Component {
               type="number"
               yAxisId="1"
              />
-             {
-            <YAxis
-              orientation="right"
-              allowDataOverflow={true}
-              // domain={[bottom2, top2]}
-              type="number"
-              yAxisId="2"
-             />
-                         // <Line yAxisId="2" type='natural' connectNulls={true} dataKey='Score1' stroke='#8884d8' animationDuration={200}/>
-            // <Line yAxisId="2" type='natural' connectNulls={true} dataKey='Score2' stroke='#82ca9d' animationDuration={200}/>
-          }
             <Tooltip/>
-            <Line yAxisId="1" type='natural' connectNulls={true} dataKey='Training' stroke='#8884d8' animationDuration={200}/>
-            <Line yAxisId="1" type='natural' connectNulls={true} dataKey='Validation' stroke='#82ca9d' animationDuration={200}/>
-            <Line yAxisId="2" type='natural' connectNulls={true} dataKey='Score1' stroke='#8884d8' animationDuration={200}/>
-            <Line yAxisId="2" type='natural' connectNulls={true} dataKey='Score2' stroke='#82ca9d' animationDuration={200}/>
-
+            {
+              this.state.yaxis && this.state.data &&
+                this.state.yaxis.map( (name,id) => {
+                  return <Line yAxisId="1" type='natural'
+                               connectNulls={true} dataKey={name}
+                               stroke={colors[id%colors.length]}
+                               animationDuration={200} key={id}/>;
+                })
+            }
             <Legend verticalAlign="top" height={36}/>
             {
-            	(refAreaLeft && refAreaRight) ? (
+              (refAreaLeft && refAreaRight) ? (
               <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight}  strokeOpacity={0.3} /> ) : null
             }
           </LineChart>
