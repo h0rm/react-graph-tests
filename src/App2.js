@@ -167,8 +167,16 @@ class App extends React.Component {
 
   renderCell = (row) => {
     if (row.value && typeof row.value === 'object') {
-      return <Inspector  data={row.value} search={false}/>
+      return (row.value.hasOwnProperty('$graph')
+            ? <GraphLoader data={row.value["$graph"]}/>
+            : <Inspector  data={row.value} search={false}/>);
     }
+    // (key,id) => {
+    //   let data = row.original[key]
+    //   return data.hasOwnProperty('$graph') ?
+    //     <GraphLoader data={data["$graph"]} key={id}/> : null;
+    // })
+
     else {
       return <div>{row.value}</div>;
     }
@@ -228,8 +236,8 @@ class App extends React.Component {
                   Object.keys(row.original).map(
                   (key,id) => {
                     let data = row.original[key]
-                    return data.hasOwnProperty('$graph') ?
-                      <GraphLoader data={data["$graph"]} key={id}/> : null;
+                    return (data.hasOwnProperty('$graph') ?
+                      <GraphLoader data={data["$graph"]} key={id}/> : null);
                   })
                 }
                 <Inspector data={row.original}/>
