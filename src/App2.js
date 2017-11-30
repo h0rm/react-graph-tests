@@ -10,6 +10,7 @@ import DropdownTreeSelect from 'react-dropdown-tree-select';
 import '../node_modules/react-dropdown-tree-select/dist/styles.css';
 
 let Inspector = require('react-json-inspector');
+const table_file = 'table.json'
 
 const isObject = (item) => {
       return (item && typeof item === 'object' && !Array.isArray(item));
@@ -65,7 +66,6 @@ const getTree = (val, name, parent) => {
 const createTree = (input_data) => {
     let all_data = {};
     for (let data of input_data) {
-      let elem = data;
       all_data = mergeDeep(all_data, getTypes(data));
     }
 
@@ -139,7 +139,7 @@ class App extends React.Component {
       if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
          server = "http://localhost:5000/"
       }
-      var url = server + 'data/processed-torch.csv.json'
+      var url = server + 'data/' + table_file
 
       fetch(url, {
         headers : {
@@ -174,9 +174,7 @@ class App extends React.Component {
     }
   }
 
-
   accessor = (data, path) => {
-    console.log(JSON.stringify(path))
     let p = path.split(".")
     let n = data
 
@@ -210,12 +208,11 @@ class App extends React.Component {
     return (
 
       <div className='App'>
-
-        { this.state.tree.length > 0
-          ? <DropdownTreeSelect data={this.state.tree}  onChange={ this.onChange}/>
-          : 'processed-torch.csv.json not found'
+        {
+           this.state.tree.length > 0 &&
+           <DropdownTreeSelect data={this.state.tree}
+                               onChange={this.onChange}/>
         }
-
         <br/>
         <ReactTable
           showPagination={true}
@@ -228,14 +225,13 @@ class App extends React.Component {
             return (
               <div>
                 {
-                  Object.keys(row.original).map((key,id) => {
+                  Object.keys(row.original).map(
+                  (key,id) => {
                     let data = row.original[key]
-                    if ( data.hasOwnProperty('$graph')) {
-                      return <GraphLoader data={data["$graph"]} key={id}/>;
-                    }
+                    return data.hasOwnProperty('$graph') ?
+                      <GraphLoader data={data["$graph"]} key={id}/> : null;
                   })
                 }
-
                 <Inspector data={row.original}/>
               </div>
             );
