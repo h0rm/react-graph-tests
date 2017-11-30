@@ -10,11 +10,13 @@ import DropdownTreeSelect from 'react-dropdown-tree-select';
 import '../node_modules/react-dropdown-tree-select/dist/styles.css';
 
 let Inspector = require('react-json-inspector');
+let equal = require('deep-equal');
+
 const table_file = 'table.json'
 
 const isObject = (item) => {
-      return (item && typeof item === 'object' && !Array.isArray(item));
-    }
+  return (item && typeof item === 'object' && !Array.isArray(item));
+}
 
 const mergeDeep = (target, source) => {
   let output = Object.assign({}, target);
@@ -84,46 +86,55 @@ class GraphLoader extends React.Component {
     graph: [],
   };
 
+  componentWillReceiveProps = (props) => {
+    if (!equal(props.data, this.state.data, {strict: true})) {
+      this.loadData(props.data)
+    }
+  }
 
-  componentDidMount = () => {
-      let server = ''
-      if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-         server = "http://localhost:5000/"
+  loadData = async (data) => {
+    let d = data
+    let server = ''
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+       server = "http://localhost:5000/"
+    }
+    var url = server + 'data/'+ d.json
+
+    fetch(url, {
+      headers : {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json' }
+     })
+    .then(function(response) {
+      if (response.status >= 400) {
+        console.log("Bad response from server graph file.");
+        return
       }
-      var url = server + 'data/'+ this.state.data.json
-
-      fetch(url, {
-        headers : {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json' }
-       })
-      .then(function(response) {
-        if (response.status >= 400) {
-          console.log("Bad response from server graph file.");
-          return
+      return response.json();
+    })
+    .then( data => {
+      if (data) {
+        let graph = data;
+        for (let i in graph) {
+          for (let j in graph[i])
+            graph[i][j] = graph[i][j] === "" ? null : graph[i][j]
         }
-        return response.json();
-      })
-      .then( data => {
-        if (data) {
-          let graph = data;
-          for (let i in graph) {
-            for (let j in graph[i])
-              graph[i][j] = graph[i][j] === "" ? null : graph[i][j]
-          }
 
-          this.setState({ graph: graph });
-        }
-      });
-    }
+        this.setState({data: d, graph: graph });
+      }
+    });
+  }
+  componentDidMount = () => {
+      this.loadData(this.state.data)
+  }
 
-    render () {
-      return (
-        <Graph data={this.state.graph}
-               xaxis={this.state.data.xaxis}
-               yaxis={this.state.data.yaxis} />
-      );
-    }
+  render () {
+    return (
+      <Graph data={this.state.graph}
+             xaxis={this.state.data.xaxis}
+             yaxis={this.state.data.yaxis} />
+    );
+  }
 }
 
 class App extends React.Component {
