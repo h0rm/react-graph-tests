@@ -22,7 +22,7 @@ docker build page-container .
 
 # Run
 ```
-docker run -it --rm -p <local port>:5000 --name page \\
+docker run -it --rm -p <local port>:5000 --name page \\
            -v <local data folder>:/app/build/data page-container
 ```
 
