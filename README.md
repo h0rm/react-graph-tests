@@ -17,7 +17,7 @@ In-row graphs:
 ```
 git clone --recursive https://github.com/h0rm/react-graph-tests.git
 cd react-graph-tests
-docker build page-container .
+docker build -t page-container .
 ```
 
 # Run
