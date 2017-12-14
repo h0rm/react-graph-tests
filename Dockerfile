@@ -17,22 +17,22 @@ WORKDIR /app/
 RUN yarn install
 
 # Link react
-WORKDIR /app/node_modules/react
-RUN yarn link
+# WORKDIR /app/node_modules/react
+# RUN yarn link
 
 # Build dependency react-dropdown-tree-select
-COPY ./dep /app/dep
+# COPY ./dep /app/dep
 
-WORKDIR /app/dep/react-dropdown-tree-select
-RUN yarn link react
-RUN yarn install
-RUN yarn build
+# WORKDIR /app/dep/react-dropdown-tree-select
+# RUN yarn link react
+# RUN yarn install
+# RUN yarn build
 
-RUN yarn link
+# RUN yarn link
 
 # Build app
-WORKDIR /app/
-RUN yarn link react-dropdown-tree-select
+# WORKDIR /app/
+# RUN yarn link react-dropdown-tree-select
 
 COPY ./public /app/public
 

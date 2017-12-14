@@ -6,11 +6,10 @@ import 'react-table/react-table.css';
 import './App.css';
 import Graph from './Graph';
 import '../node_modules/react-json-inspector/json-inspector.css';
-import DropdownTreeSelect from 'react-dropdown-tree-select';
-import '../node_modules/react-dropdown-tree-select/dist/styles.css';
 
+import isEqual from 'lodash/isEqual'
+import DropdownContainer from './DropdownContainer'
 let Inspector = require('react-json-inspector');
-let equal = require('deep-equal');
 
 const table_file = 'table.json'
 
@@ -87,7 +86,7 @@ class GraphLoader extends React.Component {
   };
 
   componentWillReceiveProps = (props) => {
-    if (!equal(props.data, this.state.data, {strict: true})) {
+    if (!isEqual(props.data, this.state.data)) {
       this.loadData(props.data)
     }
   }
@@ -229,7 +228,7 @@ class App extends React.Component {
       <div className='App'>
         {
            this.state.tree.length > 0 &&
-           <DropdownTreeSelect data={this.state.tree}
+           <DropdownContainer data={this.state.tree}
                                onChange={this.onChange}/>
         }
         <br/>
